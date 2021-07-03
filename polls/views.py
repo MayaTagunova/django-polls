@@ -9,10 +9,11 @@ from .models import Choice, Question, Poll
 
 class IndexView(generic.ListView):
     template_name = 'polls/index.html'
-    context_object_name = 'latest_polls_list'
+    context_object_name = 'polls_list'
+
 
     def get_queryset(self):
-        """Return the last five published questions."""
+        """Return all published polls."""
         return Poll.objects.filter(pub_date__lte=timezone.now())
 
 
@@ -70,9 +71,9 @@ def vote(request, poll_id):
 
 def get_queryset(self):
     """
-    Return the last five published questions (not including those set to be
+    Return all published polls (not including those set to be
     published in the future).
     """
     return Polls.objects.filter(
         pub_date__lte=timezone.now()
-    ).order_by('-pub_date')[:5]
+    ).order_by('-pub_date')

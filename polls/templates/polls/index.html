@@ -1,9 +1,9 @@
 {% load static %}
 
 <link rel="stylesheet" type="text/css" href="{% static 'polls/style.css' %}">
-{% if latest_polls_list %}
+{% if polls_list %}
     <ul>
-    {% for poll in latest_polls_list %}
+    {% for poll in polls_list %}
         <li><a href="{% url 'polls:detail' poll.id %}">{{ poll.title }}</a></li>
     {% endfor %}
     </ul>
