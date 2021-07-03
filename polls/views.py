@@ -59,10 +59,24 @@ def vote(request, poll_id):
                 'poll': poll,
                 'error_message': "You haven't selected anything.",
             })
+
         else:
+            voted_polls = request.session.get('voted_polls', [])
+            print(voted_polls)
+            if poll_id in voted_polls:
+                return render(request, 'polls/results.html', {
+                'poll': poll,
+                'error_message': "You have already voted on this poll.",
+            })
+
             for selected_choice in selected_choices:
                 selected_choice.votes += 1
                 selected_choice.save()
+
+            voted_polls.append(poll_id)
+            request.session['voted_polls'] = voted_polls
+
+
     # Always return an HttpResponseRedirect after successfully dealing
     # with POST data. This prevents data from being posted twice if a
     # user hits the Back button.
