@@ -4,7 +4,22 @@ from django.db import models
 from django.utils import timezone
 
 
+class Poll(models.Model):
+    title = models.CharField(max_length=200)
+    pub_date = models.DateTimeField('date published')
+
+
+    def __str__(self):
+        return self.title
+
+
+    def was_published_recently(self):
+        now = timezone.now()
+        return now >= self.pub_date >= now - datetime.timedelta(days=1)
+
+
 class Question(models.Model):
+    poll = models.ForeignKey(Poll, on_delete=models.CASCADE)
     TYPE_CHOICES = [
         ('radio', 'Single choice'),
         ('checkbox', 'Multiple choice'),
@@ -23,5 +38,7 @@ class Choice(models.Model):
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
     choice_text = models.CharField(max_length=200)
     votes = models.IntegerField(default=0)
+
+
     def __str__(self):
         return self.choice_text

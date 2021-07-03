@@ -1,12 +1,27 @@
-<h1>{{ question.question_text }}</h1>
+<h1>{{ poll.title }}</h1>
 
 {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
 
-<form action="{% url 'polls:vote' question.id %}" method="post">
+<form action="{% url 'polls:vote' poll.id %}" method="post">
 {% csrf_token %}
-{% for choice in question.choice_set.all %}
-    <input type="{{ question.type }}" name="choice" id="choice{{ forloop.counter }}" value="{{ choice.id }}">
-    <label for="choice{{ forloop.counter }}">{{ choice.choice_text }}</label><br>
+
+{% for question in poll.question_set.all %}
+    <h1>{{ question.question_text }}</h1>
+    {% if question.type == 'checkbox' %}
+        {% for choice in question.choice_set.all %}
+            <input type="checkbox" name="choice{{ question.id }}" id="choice{{ forloop.counter }}" value="{{ choice.id }}">
+            <label for="choice{{ forloop.counter }}">{{ choice.choice_text }}</label><br>
+        {% endfor %}
+    {% elif question.type == 'radio' %}
+        {% for choice in question.choice_set.all %}
+            <input type="radio" name="choice{{ question.id }}" id="choice{{ forloop.counter }}" value="{{ choice.id }}">
+            <label for="choice{{ forloop.counter }}">{{ choice.choice_text }}</label><br>
+        {% endfor %}
+    {% elif question.type == 'text' %}
+        <input type="text" name="choice{{ question.id }}" id="choice{{ forloop.counter }}" value="{{ choice.id }}">
+        <label for="choice{{ forloop.counter }}">{{ choice.choice_text }}</label><br>
+    {% endif %}
 {% endfor %}
+
 <input type="submit" value="Vote">
 </form>

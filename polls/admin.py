@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Choice, Question
+from .models import Choice, Question, Poll
 
 
 class ChoiceInline(admin.TabularInline):
@@ -26,4 +26,18 @@ class QuestionAdmin(admin.ModelAdmin):
         else:
             return []
 
+
+class QuestionInline(admin.TabularInline):
+    model = Question
+    fields = ['question_text']
+    show_change_link = True
+
+
+class PollAdmin(admin.ModelAdmin):
+    list_display = ['title', 'pub_date']
+    list_filter = ['pub_date']
+    inlines = [QuestionInline]
+
+
 admin.site.register(Question, QuestionAdmin)
+admin.site.register(Poll, PollAdmin)
