@@ -4,7 +4,7 @@ from django.urls import reverse
 from django.views import generic
 from django.utils import timezone
 
-from .models import Choice, Question, Poll
+from .models import Choice, Question, Poll, Vote
 
 
 class IndexView(generic.ListView):
@@ -38,14 +38,37 @@ class ResultsView(generic.DetailView):
         return Poll.objects.filter(pub_date__lte=timezone.now())
 
 
+class UserView(generic.ListView):
+    model = Poll
+    template_name = 'polls/user.html'
+    context_object_name = 'user_polls_list'
+
+
+    def get_queryset(self):
+        return Poll.objects.all()
+
+
 def vote(request, poll_id):
     poll = get_object_or_404(Poll, pk=poll_id)
+
+    if not request.session.session_key:
+        request.session.create()
+
+    print(f'Session key: {request.session._session_key}')
+
+    voted_polls = request.session.get('voted_polls', [])
+    print(f'Voted polls: {voted_polls}')
+    if poll_id in voted_polls:
+        return render(request, 'polls/results.html', {
+        'poll': poll,
+        'error_message': "You have already voted on this poll.",
+    })
 
     for question in poll.question_set.all():
         selected_choices = []
         try:
             name = f'choice{question.id}'
-            if question.type == 'radio' or question.type == 'text':
+            if question.type == 'radio': # or question.type == 'text':
                 selected_choices.append(question.choice_set.get(pk=request.POST[name]))
             elif question.type == 'checkbox':
                 choice_ids = request.POST.getlist(name)
@@ -61,17 +84,10 @@ def vote(request, poll_id):
             })
 
         else:
-            voted_polls = request.session.get('voted_polls', [])
-            print(voted_polls)
-            if poll_id in voted_polls:
-                return render(request, 'polls/results.html', {
-                'poll': poll,
-                'error_message': "You have already voted on this poll.",
-            })
-
             for selected_choice in selected_choices:
                 selected_choice.votes += 1
                 selected_choice.save()
+                Vote.objects.create(choice=selected_choice, session_key=request.session.session_key)
 
             voted_polls.append(poll_id)
             request.session['voted_polls'] = voted_polls

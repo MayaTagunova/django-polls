@@ -42,3 +42,11 @@ class Choice(models.Model):
 
     def __str__(self):
         return self.choice_text
+
+
+class Vote(models.Model):
+    choice = models.ForeignKey(Choice, on_delete=models.CASCADE)
+    session_key = models.CharField(max_length=200)
+
+    def __str__(self):
+        return f'{str(self.choice)} : {self.session_key}'
