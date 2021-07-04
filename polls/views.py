@@ -38,14 +38,18 @@ class ResultsView(generic.DetailView):
         return Poll.objects.filter(pub_date__lte=timezone.now())
 
 
-class UserView(generic.ListView):
-    model = Poll
-    template_name = 'polls/user.html'
-    context_object_name = 'user_polls_list'
-
-
-    def get_queryset(self):
-        return Poll.objects.all()
+def user(request):
+    print(request.session.session_key)
+    votes = Vote.objects.filter(session_key=request.session.session_key)
+    polls = set()
+    choices = set()
+    for vote in votes:
+        polls.add(vote.choice.question.poll)
+        choices.add(vote.choice)
+    queryset = {'polls': polls, 'choices': choices}
+    return render(request, 'polls/user.html', {
+        'user_polls_list': queryset
+    })
 
 
 def vote(request, poll_id):
@@ -78,6 +82,7 @@ def vote(request, poll_id):
                 choice = Choice.objects.get_or_create(question=question, choice_text=request.POST[name])[0]
                 choice.votes += 1
                 choice.save()
+                selected_choices.append(choice)
 
         except (KeyError, Choice.DoesNotExist):
             # Redisplay the question voting form.
