@@ -18,7 +18,7 @@
             <label for="choice{{ forloop.counter }}">{{ choice.choice_text }}</label><br>
         {% endfor %}
     {% elif question.type == 'text' %}
-        <input type="text" name="choice{{ question.id }}" id="choice{{ forloop.counter }}" value="{{ choice.id }}">
+        <input type="text" name="choice{{ question.id }}" id="choice{{ forloop.counter }}" value="">
         <label for="choice{{ forloop.counter }}">{{ choice.choice_text }}</label><br>
     {% endif %}
 {% endfor %}

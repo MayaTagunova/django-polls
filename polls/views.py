@@ -68,13 +68,16 @@ def vote(request, poll_id):
         selected_choices = []
         try:
             name = f'choice{question.id}'
-            if question.type == 'radio': # or question.type == 'text':
+            if question.type == 'radio':
                 selected_choices.append(question.choice_set.get(pk=request.POST[name]))
             elif question.type == 'checkbox':
                 choice_ids = request.POST.getlist(name)
-                if choice_ids:
-                    for choice_id in choice_ids:
-                        selected_choices.append(question.choice_set.get(pk=int(choice_id))) #Choice.objects.get(id=int(choice_id))
+                for choice_id in choice_ids:
+                    selected_choices.append(question.choice_set.get(pk=int(choice_id)))
+            elif question.type == 'text':
+                choice = Choice.objects.get_or_create(question=question, choice_text=request.POST[name])[0]
+                choice.votes += 1
+                choice.save()
 
         except (KeyError, Choice.DoesNotExist):
             # Redisplay the question voting form.
